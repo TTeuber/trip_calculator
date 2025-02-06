@@ -31,14 +31,27 @@ class ItemFormState extends State<ItemForm> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _costController = TextEditingController();
   List<Item> items = [];
+
+  @override void initState() {
+    super.initState();
+    items = [
+      Item('Louis', 53.54, '1'),
+      Item('Carter', 50.23, '2'),
+      Item('David', 113.41, '3'),
+    ];
+    averageCost = items.map((item) => item.cost).reduce((a, b) => a + b) / items.length;
+    totalCost = items.map((item) => item.cost).reduce((a, b) => a + b);
+    results = calculator(items.map((item) => item.clone()).toList());
+  }
+
   void onItemUpdated(Item updatedItem) {
     setState(() {
       final index = items.indexWhere((item) => item.id == updatedItem.id);
       if (index != -1) {
-        items[index] = updatedItem;
+        items[index] = updatedItem.clone();
       }
       averageCost = items.map((item) => item.cost).reduce((a, b) => a + b) / items.length;
-
+      totalCost = items.map((item) => item.cost).reduce((a, b) => a + b);
       results = calculator(items.map((item) => item.clone()).toList());
     });
   }
@@ -94,11 +107,10 @@ class ItemFormState extends State<ItemForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Item Form')),
-      body: Padding(
+      appBar: AppBar(title: Text('Trip Calculator', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold))),
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
@@ -118,6 +130,13 @@ class ItemFormState extends State<ItemForm> {
               child: Text('Submit'),
             ),
             SizedBox(height: 20),
+            if (results.isNotEmpty) ...[
+              SizedBox(height: 20),
+              Center(
+                child: Text('Results', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+              ),
+              ...results.map((result) => Center(child: Text(result, style: TextStyle(fontSize: 24)))),
+            ],
             Row(
               children: [
                 Text('Total Cost: \$${totalCost.toStringAsFixed(2)}', style: TextStyle(fontSize: 18)),
@@ -125,20 +144,18 @@ class ItemFormState extends State<ItemForm> {
                 Text('Average Cost: \$${averageCost.toStringAsFixed(2)}', style: TextStyle(fontSize: 18)),
               ],
             ),
-            // ...items.map((item) => Text("${item.name} - ${item.cost}")),
-            ...items.map((item) => ItemDisplay(item: item, onItemUpdated: onItemUpdated)),
-            if (results.isNotEmpty) ...[
-              SizedBox(height: 20),
-              Center(
-                child: Text('Results', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+            ConstrainedBox(
+              constraints: BoxConstraints(minHeight: 200.0, maxHeight: 400.0),
+              // height: 300.0, // Specify an explicit height for scrollable content
+              child: SingleChildScrollView(
+                child: Column(
+                  children: items.map((item) => ItemDisplay(item: item, onItemUpdated: onItemUpdated)).toList(),
+                ),
               ),
-              ...results.map((result) => Center(child: Text(result, style: TextStyle(fontSize: 24)))),
-            ]
-          ],
-          ),
+            ),
+          ]),
         ),
-      ),
-    );
+      );
   }
 }
 

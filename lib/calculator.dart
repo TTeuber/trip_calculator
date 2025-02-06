@@ -12,7 +12,6 @@ import 'item.dart';
 /// - Returns a list of strings describing the cost transfer transactions between items.
 ///
 List<String> calculator(List<Item> items) {
-
   List<String> results = [];
 
   double averageCost =
@@ -48,5 +47,5 @@ List<String> calculator(List<Item> items) {
   }
 
   /// Return the list of transaction descriptions detailing the redistribution process.
-  return results;
+  return results.toList();
 }

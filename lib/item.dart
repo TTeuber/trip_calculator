@@ -13,4 +13,8 @@ class Item {
   static String generateID() {
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
+
+  void show() {
+    print('Name: $name, Cost: $cost, ID: $id');
+  }
 }
