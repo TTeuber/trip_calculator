@@ -18,7 +18,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 class ItemForm extends StatefulWidget {
   const ItemForm({super.key});
 
@@ -29,7 +28,7 @@ class ItemForm extends StatefulWidget {
 class ItemFormState extends State<ItemForm> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _costController = TextEditingController();
-  List<Map<String, dynamic>> items = [];
+  List<Item> items = [];
   List<String> results = [];
   double averageCost = 0.0;
 
@@ -39,13 +38,14 @@ class ItemFormState extends State<ItemForm> {
 
     if (name.isNotEmpty && cost != null) {
       setState(() {
-        items.add({'name': name, 'cost': cost});
-        averageCost = items.map((item) => item['cost'] as double).reduce((a, b) => a + b) / items.length;
+        items.add(Item(name, cost));
+
+        averageCost = items.map((item) => item.cost).reduce((a, b) => a + b) / items.length;
       });
 
       // using the calculator function from the calculator.dart file
       setState(() {
-        results = calculator(items.map((item) => {...item}).toList());
+        results = calculator(items.map((item) => item.clone()).toList());
       });
 
     // previously fetching data from flask server
@@ -103,7 +103,7 @@ class ItemFormState extends State<ItemForm> {
             ),
             SizedBox(height: 20),
             Text('Average Cost: \$${averageCost.toStringAsFixed(2)}'),
-            ...items.map((item) => Text("${item['name']} - ${item['cost']}")),
+            ...items.map((item) => Text("${item.name} - ${item.cost}")),
             if (results.isNotEmpty) ...[
               SizedBox(height: 20),
               Text('Results', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
