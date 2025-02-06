@@ -1,7 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:trip_calculator/calculator.dart';
+import 'item.dart';
+import 'item_display.dart';
+// import 'package:http/http.dart' as http;
+// import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -29,8 +31,20 @@ class ItemFormState extends State<ItemForm> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _costController = TextEditingController();
   List<Item> items = [];
+  void onItemUpdated(Item updatedItem) {
+    setState(() {
+      final index = items.indexWhere((item) => item.id == updatedItem.id);
+      if (index != -1) {
+        items[index] = updatedItem;
+      }
+      averageCost = items.map((item) => item.cost).reduce((a, b) => a + b) / items.length;
+
+      results = calculator(items.map((item) => item.clone()).toList());
+    });
+  }
   List<String> results = [];
   double averageCost = 0.0;
+  double totalCost = 0.0;
 
   Future<void> _submitForm() async {
     final String name = _nameController.text;
@@ -38,9 +52,10 @@ class ItemFormState extends State<ItemForm> {
 
     if (name.isNotEmpty && cost != null) {
       setState(() {
-        items.add(Item(name, cost));
+        items.add(Item(name, cost, Item.generateID()));
 
         averageCost = items.map((item) => item.cost).reduce((a, b) => a + b) / items.length;
+        totalCost = items.map((item) => item.cost).reduce((a, b) => a + b);
       });
 
       // using the calculator function from the calculator.dart file
@@ -82,8 +97,9 @@ class ItemFormState extends State<ItemForm> {
       appBar: AppBar(title: Text('Item Form')),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: _nameController,
@@ -102,14 +118,24 @@ class ItemFormState extends State<ItemForm> {
               child: Text('Submit'),
             ),
             SizedBox(height: 20),
-            Text('Average Cost: \$${averageCost.toStringAsFixed(2)}'),
-            ...items.map((item) => Text("${item.name} - ${item.cost}")),
+            Row(
+              children: [
+                Text('Total Cost: \$${totalCost.toStringAsFixed(2)}', style: TextStyle(fontSize: 18)),
+                SizedBox(width: 16),
+                Text('Average Cost: \$${averageCost.toStringAsFixed(2)}', style: TextStyle(fontSize: 18)),
+              ],
+            ),
+            // ...items.map((item) => Text("${item.name} - ${item.cost}")),
+            ...items.map((item) => ItemDisplay(item: item, onItemUpdated: onItemUpdated)),
             if (results.isNotEmpty) ...[
               SizedBox(height: 20),
-              Text('Results', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ...results.map((result) => Text(result)),
+              Center(
+                child: Text('Results', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+              ),
+              ...results.map((result) => Center(child: Text(result, style: TextStyle(fontSize: 24)))),
             ]
           ],
+          ),
         ),
       ),
     );
