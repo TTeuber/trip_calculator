@@ -1,5 +1,3 @@
-/// Represents an item with a name and a cost.
-/// Provides a method to create a duplicate of the item to handle mutability issues.
 class Item {
   String name;
   double cost;
@@ -7,14 +5,14 @@ class Item {
 
   Item(this.name, this.cost, this.id);
 
-  Item clone() {
+  Item clone() { // Creates a duplicate of the item, used to avoid mutability issues
     return Item(name, cost, id);
   }
   static String generateID() {
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
-  void show() {
+  void show() { // Displays the item's details, used for debugging
     print('Name: $name, Cost: $cost, ID: $id');
   }
 }

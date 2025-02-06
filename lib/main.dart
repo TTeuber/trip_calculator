@@ -1,9 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:trip_calculator/calculator.dart';
-import 'item.dart';
-import 'item_display.dart';
-// import 'package:http/http.dart' as http;
-// import 'dart:convert';
+import 'package:flutter/material.dart'; // Flutter library for creating UI components
+import 'package:trip_calculator/calculator.dart'; // Custom module to perform trip cost calculations
+import 'item.dart'; // Data model representing an individual trip item
+import 'item_display.dart'; // Widget to display an individual trip item
 
 void main() {
   runApp(MyApp());
@@ -15,6 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
       home: ItemForm(),
     );
   }
@@ -27,14 +26,16 @@ class ItemForm extends StatefulWidget {
   ItemFormState createState() => ItemFormState();
 }
 
-class ItemFormState extends State<ItemForm> {
+class ItemFormState extends State<ItemForm> { // Manages the state of the trip cost form
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _costController = TextEditingController();
-  List<Item> items = [];
+
+  List<Item> items = []; // List to store all trip items
 
   @override void initState() {
     super.initState();
-    items = [
+    items = [ // Pre-filled trip items for demonstration
       Item('Louis', 53.54, '1'),
       Item('Carter', 50.23, '2'),
       Item('David', 113.41, '3'),
@@ -44,7 +45,7 @@ class ItemFormState extends State<ItemForm> {
     results = calculator(items.map((item) => item.clone()).toList());
   }
 
-  void onItemUpdated(Item updatedItem) {
+  void onItemUpdated(Item updatedItem) { // Update an item in the list, Used in the ItemDisplay widget
     setState(() {
       final index = items.indexWhere((item) => item.id == updatedItem.id);
       if (index != -1) {
@@ -55,49 +56,26 @@ class ItemFormState extends State<ItemForm> {
       results = calculator(items.map((item) => item.clone()).toList());
     });
   }
-  List<String> results = [];
-  double averageCost = 0.0;
-  double totalCost = 0.0;
 
-  Future<void> _submitForm() async {
+  List<String> results = []; // Stores the calculated results for display
+  double averageCost = 0.0; // Average cost of all items
+  double totalCost = 0.0; // Total cost of all items
+
+  void _submitForm() {
     final String name = _nameController.text;
     final double? cost = double.tryParse(_costController.text);
 
     if (name.isNotEmpty && cost != null) {
-      setState(() {
+      setState(() { // Add the new item and recalculate totals
         items.add(Item(name, cost, Item.generateID()));
 
         averageCost = items.map((item) => item.cost).reduce((a, b) => a + b) / items.length;
         totalCost = items.map((item) => item.cost).reduce((a, b) => a + b);
       });
 
-      // using the calculator function from the calculator.dart file
       setState(() {
         results = calculator(items.map((item) => item.clone()).toList());
       });
-
-    // previously fetching data from flask server
-    //   try {
-    //     final response = await http.post(
-    //       Uri.parse('http://127.0.0.1:5000'),
-    //       headers: {'Content-Type': 'application/json'},
-    //       body: jsonEncode(items),
-    //     );
-    //
-    //     if (response.statusCode == 200) {
-    //       setState(() {
-    //         results = List<String>.from(jsonDecode(response.body));
-    //       });
-    //     } else {
-    //       setState(() {
-    //         results.add('Error: Invalid response');
-    //       });
-    //     }
-    //   } catch (e) {
-    //     setState(() {
-    //       results.add('Error: Failed to connect');
-    //     });
-    //   }
     }
 
     _nameController.clear();
@@ -106,48 +84,50 @@ class ItemFormState extends State<ItemForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Trip Calculator', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold))),
-      body: SingleChildScrollView(
+    return Scaffold( // Main layout of the screen
+
+      appBar: AppBar(title: Text('Trip Calculator', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold))), // App title bar
+
+      body: SingleChildScrollView( // Scrollable content for smaller screens
         padding: EdgeInsets.all(16.0),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
+            TextField( // Input for item name
               controller: _nameController,
               decoration: InputDecoration(labelText: 'Name'),
               onSubmitted: (_) => _submitForm(),
             ),
-            TextField(
+            TextField( // Input for item cost
               controller: _costController,
               decoration: InputDecoration(labelText: 'Cost'),
               keyboardType: TextInputType.number,
               onSubmitted: (_) => _submitForm(),
             ),
             SizedBox(height: 10),
-            ElevatedButton(
+            ElevatedButton( // Submit button to add a new item
               onPressed: _submitForm,
               child: Text('Submit'),
             ),
             SizedBox(height: 20),
-            if (results.isNotEmpty) ...[
+            if (results.isNotEmpty) ...[ // Display results only if they exist
               SizedBox(height: 20),
               Center(
-                child: Text('Results', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+                child: Text('Results', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)), // Results title
               ),
               ...results.map((result) => Center(child: Text(result, style: TextStyle(fontSize: 24)))),
             ],
-            Row(
+            Row( // Display total and average costs
               children: [
-                Text('Total Cost: \$${totalCost.toStringAsFixed(2)}', style: TextStyle(fontSize: 18)),
+                Text('Total Cost: \$${totalCost.toStringAsFixed(2)}', style: TextStyle(fontSize: 18)), // Show total cost
                 SizedBox(width: 16),
-                Text('Average Cost: \$${averageCost.toStringAsFixed(2)}', style: TextStyle(fontSize: 18)),
+                Text('Average Cost: \$${averageCost.toStringAsFixed(2)}', style: TextStyle(fontSize: 18)), // Show average cost
               ],
             ),
             ConstrainedBox(
-              constraints: BoxConstraints(minHeight: 200.0, maxHeight: 400.0),
+              constraints: BoxConstraints(minHeight: 200.0, maxHeight: 500.0), // Constrain height for better presentation
               // height: 300.0, // Specify an explicit height for scrollable content
-              child: SingleChildScrollView(
+              child: SingleChildScrollView( // Scrollable list of items
                 child: Column(
                   children: items.map((item) => ItemDisplay(item: item, onItemUpdated: onItemUpdated)).toList(),
                 ),

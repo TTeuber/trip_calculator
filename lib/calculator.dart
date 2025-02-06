@@ -23,20 +23,20 @@ List<String> calculator(List<Item> items) {
   List<Item> belowAverage =
     items.where((i) => i.cost < averageCost).toList();
 
-  /// For each item below average, calculate the needed transfer amount and adjust costs.
+  // For each item below average, calculate the needed transfer amount and adjust costs.
   for (var item in belowAverage) {
 
-    /// The amount to be transferred to the item currently below average.
+    // The amount to be transferred to the item currently below average.
     double transferFrom = double.parse((averageCost - item.cost).toStringAsFixed(2));
     item.cost = item.cost + transferFrom;
 
     double aboveCostSum =
       aboveAverage.fold(0, (sum, p) => sum + (p.cost - averageCost));
 
-    /// Distribute the calculated transfer amounts to items above average proportionally.
+    // Distribute the calculated transfer amounts to items above average proportionally.
     for (var i in aboveAverage) {
 
-      /// The amount to transfer from this below-average item to the current above-average item.
+      // The amount to transfer from this below-average item to the current above-average item.
       double transferTo = double.parse(
           (((i.cost - averageCost) / aboveCostSum) * transferFrom).toStringAsFixed(2)
       );
@@ -46,6 +46,6 @@ List<String> calculator(List<Item> items) {
     }
   }
 
-  /// Return the list of transaction descriptions detailing the redistribution process.
+  // Return the list of transaction descriptions detailing the redistribution process.
   return results.toList();
 }
