@@ -36,9 +36,9 @@ class ItemFormState extends State<ItemForm> { // Manages the state of the trip c
   @override void initState() {
     super.initState();
     items = [ // Pre-filled trip items for demonstration
-      Item('Louis', 53.54, '1'),
-      Item('Carter', 50.23, '2'),
-      Item('David', 113.41, '3'),
+      Item('Louis',  '1', [53.54]),
+      Item('Carter',  '2', [50.23]),
+      Item('David',  '3', [113.41]),
     ];
     averageCost = items.map((item) => item.cost).reduce((a, b) => a + b) / items.length;
     totalCost = items.map((item) => item.cost).reduce((a, b) => a + b);
@@ -67,15 +67,13 @@ class ItemFormState extends State<ItemForm> { // Manages the state of the trip c
 
     if (name.isNotEmpty && cost != null) {
       setState(() { // Add the new item and recalculate totals
-        items.add(Item(name, cost, Item.generateID()));
+        items.add(Item(name, Item.generateID(), [cost]));
 
         averageCost = items.map((item) => item.cost).reduce((a, b) => a + b) / items.length;
         totalCost = items.map((item) => item.cost).reduce((a, b) => a + b);
-      });
-
-      setState(() {
         results = calculator(items.map((item) => item.clone()).toList());
       });
+
     }
 
     _nameController.clear();

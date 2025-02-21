@@ -28,7 +28,7 @@ List<String> calculator(List<Item> items) {
 
     // The amount to be transferred to the item currently below average.
     double transferFrom = double.parse((averageCost - item.cost).toStringAsFixed(2));
-    item.cost = item.cost + transferFrom;
+    // item.cost = item.cost + transferFrom;
 
     double aboveCostSum =
       aboveAverage.fold(0, (sum, p) => sum + (p.cost - averageCost));
@@ -42,7 +42,7 @@ List<String> calculator(List<Item> items) {
       );
 
       results.add("${item.name} transfers \$${transferTo.toStringAsFixed(2)} to ${i.name}");
-      i.cost = i.cost - transferTo;
+      // i.cost = i.cost - transferTo;
     }
   }
 

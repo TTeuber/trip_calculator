@@ -1,77 +1,140 @@
 import 'package:flutter/material.dart';
 import 'item.dart';
 
-class ItemDisplay extends StatefulWidget { // Widget to display and manage an Item
-
-  final Item item; // The item to be displayed and edited
-  final ValueChanged<Item> onItemUpdated; // Callback triggered when the item is updated
+class ItemDisplay extends StatefulWidget {
+  final Item item;
+  final ValueChanged<Item> onItemUpdated;
 
   const ItemDisplay({
-    Key? key,
+    super.key,
     required this.item,
     required this.onItemUpdated,
-  }) : super(key: key);
+  });
 
-  @override // Creates the state for the ItemDisplay widget
+  @override
   _ItemDisplayState createState() => _ItemDisplayState();
 }
 
-class _ItemDisplayState extends State<ItemDisplay> { // State class to manage the text input and updates
-
+class _ItemDisplayState extends State<ItemDisplay> {
   late TextEditingController _nameController;
-  late TextEditingController _costController;
+  late List<TextEditingController> _individualCostControllers;
 
   @override
-  void initState() { // Initializes the text controllers with existing item values
+  void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.item.name);
-    _costController = TextEditingController(text: widget.item.cost.toStringAsFixed(2));
+
+    // Initialize controllers for individualCosts
+    _individualCostControllers = widget.item.individualCosts
+        .map((cost) => TextEditingController(text: cost.toStringAsFixed(2)))
+        .toList();
   }
 
   @override
-  void dispose() { // Releases resources used by the text controllers
+  void dispose() {
     _nameController.dispose();
-    _costController.dispose();
+    for (var controller in _individualCostControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
-  void _onNameChanged(String newName) { // Updates the item's name and triggers the callback
+  void _onNameChanged(String newName) {
     widget.onItemUpdated(
-      Item(newName, widget.item.cost, widget.item.id),
+      Item(newName, widget.item.id, widget.item.individualCosts),
     );
   }
 
-  void _onCostChanged(String newCost) { // Updates the item's cost and triggers the callback
-    final cost = double.tryParse(newCost) ?? widget.item.cost;
+  void _onIndividualCostChanged(int index, String newCost) {
+    final costs = widget.item.individualCosts;
+    final updatedCosts = List<double>.from(costs);
+
+    // Parse the updated cost or default to the previous value
+    updatedCosts[index] = double.tryParse(newCost) ?? costs[index];
+
+    // Trigger the update with the new individualCosts
     widget.onItemUpdated(
-      Item(widget.item.name, cost, widget.item.id),
+      Item(
+        widget.item.name,
+        widget.item.id,
+        updatedCosts,
+      ),
     );
+  }
+
+  void _addIndividualCost() {
+    final updatedCosts = [...widget.item.individualCosts, 0.0];
+
+    // Update the parent with the new individualCosts and reload controllers
+    widget.onItemUpdated(
+      Item(widget.item.name, widget.item.id, updatedCosts),
+    );
+
+    setState(() {
+      _individualCostControllers.add(TextEditingController(text: "0.00"));
+    });
+  }
+
+  void _removeIndividualCost(int index) {
+    if (widget.item.individualCosts.length <= 1) return; // Ensure at least one cost remains
+    final List<double> updatedCosts = List.from(widget.item.individualCosts)..removeAt(index);
+
+    widget.onItemUpdated(
+      Item(widget.item.name, widget.item.id, updatedCosts),
+    );
+
+    setState(() {
+      _individualCostControllers.removeAt(index);
+    });
   }
 
   @override
-  Widget build(BuildContext context) { // Builds the UI for the ItemDisplay widget
-
-    return Card( // Displays a card containing the input fields
+  Widget build(BuildContext context) {
+    return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField( // Input field for the item's name
+            TextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-              ),
+              decoration: const InputDecoration(labelText: 'Name'),
               onChanged: _onNameChanged,
             ),
             const SizedBox(height: 16.0),
-            TextField( // Input field for the item's cost
-              controller: _costController,
-              decoration: const InputDecoration(
-                labelText: 'Cost',
-              ),
-              keyboardType: TextInputType.number, // Ensures the keyboard is optimized for numerical input
-              onChanged: _onCostChanged,
+            Text(
+              'Individual Costs:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            ...List.generate(widget.item.individualCosts.length, (index) {
+              return Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _individualCostControllers[index],
+                      decoration: const InputDecoration(
+                        labelText: 'Cost',
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => _onIndividualCostChanged(index, value),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => _removeIndividualCost(index),
+                    icon: const Icon(Icons.remove_circle, color: Colors.red),
+                  ),
+                ],
+              );
+            }),
+            const SizedBox(height: 10.0),
+            ElevatedButton(
+              onPressed: _addIndividualCost,
+              child: const Text('Add Individual Cost'),
+            ),
+            const SizedBox(height: 16.0),
+            Text(
+              'Total Cost: \$${widget.item.cost.toStringAsFixed(2)}',
+              // style: Theme.of(context).textTheme.subtitle1,
             ),
           ],
         ),
