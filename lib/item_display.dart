@@ -103,6 +103,11 @@ class _ItemDisplayState extends State<ItemDisplay> {
             ),
             const SizedBox(height: 16.0),
             Text(
+              'Total Cost: \$${widget.item.cost.toStringAsFixed(2)}',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16.0),
+            Text(
               'Individual Costs:',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -130,11 +135,6 @@ class _ItemDisplayState extends State<ItemDisplay> {
             ElevatedButton(
               onPressed: _addIndividualCost,
               child: const Text('Add Individual Cost'),
-            ),
-            const SizedBox(height: 16.0),
-            Text(
-              'Total Cost: \$${widget.item.cost.toStringAsFixed(2)}',
-              // style: Theme.of(context).textTheme.subtitle1,
             ),
           ],
         ),

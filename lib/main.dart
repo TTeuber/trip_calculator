@@ -36,9 +36,9 @@ class ItemFormState extends State<ItemForm> { // Manages the state of the trip c
   @override void initState() {
     super.initState();
     items = [ // Pre-filled trip items for demonstration
-      Item('Louis',  '1', [53.54]),
-      Item('Carter',  '2', [50.23]),
-      Item('David',  '3', [113.41]),
+      Item('Louis',  '1', [5.75, 35.00, 12.79]),
+      Item('Carter',  '2', [12.00, 15.00, 23.23]),
+      Item('David',  '3', [10.00, 20.00, 38.41, 45.00]),
     ];
     averageCost = items.map((item) => item.cost).reduce((a, b) => a + b) / items.length;
     totalCost = items.map((item) => item.cost).reduce((a, b) => a + b);
